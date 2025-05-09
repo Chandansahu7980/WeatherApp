@@ -3,13 +3,10 @@
 <head>
     <!-- Specifies the character encoding for the document -->
     <meta charset="UTF-8">
-    
     <!-- Ensures proper rendering and touch zooming on mobile devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
     <!-- Sets the title of the webpage -->
     <title>Weather App</title>
-    
     <!-- Links an external CSS file for styling -->
     <link rel="stylesheet" href="./style.css">
 </head>
@@ -44,11 +41,44 @@
             resultDiv.textContent = 'Fetching weather...';
 
             try {
-                // Replace with your weather API endpoint and key
+                // Fetch weather data from the API using the city name
+                // The API URL is constructed using the city name entered by the user   
                 const response = await fetch(`https://goweather.xyz/weather/${city}`);
                 if (!response.ok) throw new Error('City not found');
                 const data = await response.json();
-                resultDiv.innerHTML = `<p>Weather in ${city}: ${data.temperature}, ${data.description}</p>`;
+                resultDiv.innerHTML = `
+                    <div style="border: 1px solid #ccc;">
+                        <h3>Today's Weather</h3>
+                        <p><strong>City:</strong> ${city}<br>
+                        <strong>Temperature:</strong> ${data.temperature}<br>
+                        <strong>Wind:</strong> ${data.wind}<br>
+                        <strong>Description:</strong> ${data.description}</p>
+                    </div>
+                    <div style="border: 1px solid #ccc;">
+                        <h4>3-Day Forecast</h4>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="border: 1px solid #ccc;">Day</th>
+                                    <th style="border: 1px solid #ccc;">Temperature</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.forecast.map(day => {
+                                    const date = new Date();
+                                    date.setDate(date.getDate() + parseInt(day.day.replace('Day ', '')));
+                                    const options = { weekday: 'long', month: 'short', day: 'numeric' };
+                                    return `
+                                        <tr>
+                                            <td style="border: 1px solid #ccc;">${date.toLocaleDateString('en-US', options)}</td>
+                                            <td style="border: 1px solid #ccc;">${day.temperature}</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>`;
+                console.log(data);
             } catch (error) {
                 resultDiv.textContent = error.message;
             }
